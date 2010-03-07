@@ -9,7 +9,7 @@ function create_container() {
   $factory = new ApplicationFactory();
   $container = new bucket_Container($factory);
   $factory->template_dir = realpath(dirname(__FILE__) . '/../templates');
-  $factory->pdo_dsn = 'mysql:host=localhost;dbname=test';
+  $factory->pdo_dsn = 'sqlite:../blog.sqlite';
   $factory->pdo_username = 'root';
   return $container;
 }

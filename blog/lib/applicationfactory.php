@@ -13,4 +13,7 @@ class ApplicationFactory {
   function new_k_TemplateFactory($c) {
     return new k_DefaultTemplateFactory($this->template_dir);
   }
+  function new_TableGateway($c) {
+    return new TableGateway("blogentries", $this->new_PDO($c));
+  }
 }
