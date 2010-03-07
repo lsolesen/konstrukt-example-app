@@ -17,7 +17,7 @@ In our example application we will use the following:
 * Zend_Validate for validating form inputs
 * bucket for dependency injection
 
-Getting started
+Setting up requirements
 --
 
 A little voodoo at the command line makes it quite easy to install dependencies, as kontrukt and the requirements can be installed using the pear command line.
@@ -34,4 +34,16 @@ A little voodoo at the command line makes it quite easy to install dependencies,
 
 Now all the dependencies are installed, and we are ready to start the project.
 
+Getting started
+--
 
+We will be using the default starter pack from the konstrukt examples as a starting point for creating our blog. You need to put the code in a directory which can be accessed through a web browser.
+
+	mkdir blog
+    svn export http://konstrukt.googlecode.com/svn/tags/2.3.1/examples/starterpack_default blog
+    
+After setting it up, you should be able to navigate to:
+
+	http://workspace/blog/www/
+	
+And you will be greeted with a message: Root. This page has intentionally been left blank. This makes a great starting point for creating your blog.
