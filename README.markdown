@@ -39,7 +39,6 @@ Getting started
 
 We will be using the default starter pack from the konstrukt examples as a starting point for creating our blog. You need to put the code in a directory which can be accessed through a web browser.
 
-	mkdir blog
     svn export http://konstrukt.googlecode.com/svn/tags/2.3.1/examples/starterpack_default blog
     
 After setting it up, you should be able to navigate to:
