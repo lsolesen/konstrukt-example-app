@@ -7,6 +7,9 @@ class components_Root extends k_Component {
   function execute() {
     return $this->wrap(parent::execute());
   }
+  function map($name) {
+      return 'components_Blog';
+  }
   function wrapHtml($content) {
     $t = $this->templates->create("document");
     return
