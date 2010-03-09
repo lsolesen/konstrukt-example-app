@@ -10,10 +10,13 @@ class ApplicationFactory {
   function new_PDO($c) {
     return new PDO($this->pdo_dsn, $this->pdo_username, $this->pdo_password);
   }
+  function new_pdoext_Connection($c) {
+    return new pdoext_Connection($this->pdo_dsn, $this->pdo_username, $this->pdo_password);
+  }
   function new_k_TemplateFactory($c) {
     return new k_DefaultTemplateFactory($this->template_dir);
   }
-  function new_TableGateway($c) {
-    return new TableGateway("blogentries", $this->new_PDO($c));
+  function new_model_BlogGateway($c) {
+    return new model_BlogGateway($this->new_pdoext_Connection($c));
   }
 }

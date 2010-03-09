@@ -47,15 +47,20 @@ After setting it up, you should be able to navigate to:
 	
 And you will be greeted with a message: Root. This page has intentionally been left blank. This makes a great starting point for creating your blog.
 
-Now the default directory structure will be created. We will start setting up a couple of things that we need when developing the application. Konstrukt relies on dependency injection, so we will start setting up the di-container. First we will add a method for the application factory placed in the lib-directory.
+In the config/global.inc.php we will add the following lines right after the include of konstrukt:
 
-	cd blog/lib
-	gedit applicationfactory.php
-	
-We will add this method at the bottom of the class:
+    require_once 'pdoext/query.inc.php';
+    require_once 'pdoext/tablegateway.php';
+    require_once 'pdoext/connection.inc.php';
 
-    function new_TableGateway($c) {
-      return new TableGateway("blogentries", $this->new_PDO($c));
+Now the default directory structure will be created. We will start setting up a couple of things that we need when developing the application. Konstrukt relies on dependency injection, so we will start setting up the di-container. First we will add some methods in the application factory placed in the lib-directory. We will add these methods at the bottom of the class:
+
+    function new_pdoext_Connection($c) {
+      return new pdoext_Connection($this->pdo_dsn, $this->pdo_username, $this->pdo_password);
+    }
+
+    function new_model_BlogGateway($c) {
+      return new model_BlogGateway("blogentries", $this->new_pdoext_Connection($c));
     }
 	
 Now we will edit some of the config-settings.
@@ -69,7 +74,7 @@ We need to change the database. We will be using a sqlite-file to make it easy. 
 
 Make sure that you have write access to the directory where the sqllite file will be put. Now we need to make our first component:
 
-Migrating database
+Create the database
 --
 
 Create a var directory and make it writable.
@@ -81,8 +86,21 @@ Go to the script directory. Run the following code:
 
     php generate_migration.php
  
-This command will generate a migration file in the directory migrations. Navigate to that file and edit it:
+This command will generate a skeleton migration file in the directory migrations. Navigate to that file and edit it. Put in the following code:
 
-    gedit migrations/20100309200758.php
-    
+	#!/usr/bin/env php
+	<?php
+	require_once(dirname(__FILE__) . '/../../config/global.inc.php');
+	$container = create_container();
+	$db = $container->create('PDO');
+	$db->exec('drop table if exists blogentries');
+	$db->exec('CREATE TABLE blogentries (
+  		name varchar(255) NOT NULL,
+  		published datetime NOT NULL,
+  		title varchar(255) NOT NULL,
+  		excerpt text NOT NULL,
+  		content longtext NOT NULL,
+	  	PRIMARY KEY (name)
+    );');    
 
+Now the database has been setup, and we are ready to create our components.
