@@ -68,3 +68,21 @@ We need to change the database. We will be using a sqlite-file to make it easy. 
     $factory->pdo_dsn = 'sqlite:../blog.sqlite';
 
 Make sure that you have write access to the directory where the sqllite file will be put. Now we need to make our first component:
+
+Migrating database
+--
+
+Create a var directory and make it writable.
+
+	mkdir var
+	chmod 777 var
+
+Go to the script directory. Run the following code:
+
+    php generate_migration.php
+ 
+This command will generate a migration file in the directory migrations. Navigate to that file and edit it:
+
+    gedit migrations/20100309200758.php
+    
+
