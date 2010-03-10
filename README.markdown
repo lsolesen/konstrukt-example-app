@@ -63,14 +63,10 @@ Now the default directory structure will be created. We will start setting up a 
       return new model_BlogGateway("blogentries", $this->new_pdoext_Connection($c));
     }
 	
-Now we will edit some of the config-settings.
+First setup a database in mysql. Now we will edit some of the config-settings in config/development.inc.php. We need to change the database. We will be using a sqlite-file to make it easy. We will set this up in the function create_container(). We will change these settings:
 
-	cd blog/config/
-	gedit development.inc.php
-	
-We need to change the database. We will be using a sqlite-file to make it easy. We will set this up in the function create_container(). We will change one setting:
-
-    $factory->pdo_dsn = 'sqlite:../blog.sqlite';
+    $factory->pdo_dsn = 'mysql:host=localhost;dbname=blog';
+    $factory->pdo_username = 'root';
 
 Make sure that you have write access to the directory where the sqllite file will be put. Now we need to make our first component:
 
@@ -92,18 +88,31 @@ This command will generate a skeleton migration file in the directory migrations
 	<?php
 	require_once(dirname(__FILE__) . '/../../config/global.inc.php');
 	$container = create_container();
-	$db = $container->create('PDO');
-	$db->exec('drop table if exists blogentries');
+	$db = $container->create('pdoext_Connection');
 	$db->exec('CREATE TABLE blogentries (
-  		name varchar(255) NOT NULL,
-  		published datetime NOT NULL,
-  		title varchar(255) NOT NULL,
-  		excerpt text NOT NULL,
-  		content longtext NOT NULL,
-	  	PRIMARY KEY (name)
-    );');    
+	  id int(11) NOT NULL AUTO_INCREMENT,
+	  name varchar(255) NOT NULL,
+	  published datetime NOT NULL,
+	  title varchar(255) NOT NULL,
+	  excerpt text NOT NULL,
+	  content longtext NOT NULL,
+	  PRIMARY KEY (id)
+    );');
 
-Now the database has been setup, and we are ready to create our components.
+Now the database has been setup, and we are ready to create some models.
+
+Adding some models
+--
+
+We will add a model for the blog entries in in lib/model. Let's call it bloggateway.php. We will let it extend pdoext_TableGateway.
+
+    class model_BlogGateway extends pdoext_TableGateway {
+        function __construct(pdoext_Connection $pdo) {
+            return parent::__construct('blogentries', $pdo);
+        }
+    }
+
+Now we are ready to create our components.
 
 Creating our first component
 --
@@ -112,48 +121,74 @@ With no further ado we will present our first component:
 
     <?php
 	class components_Blog extends k_Component {
-  		protected $gateway;
-  		protected $templates;
-  		protected $form;
+  	    protected $gateway;
+  	    protected $templates;
+        protected $form;
 
-  		/**
-   		 * Constructor
-   		 *
-		 * Relies on dependency injection handled by bucket.
-   * @see www/index.php
-   * @see lib/applicationfactory.php
-   *
-   * @param object $datasource
-   * @param objct $templates
-   *
-   * @return void
-   */
-  function __construct(model_BlogGateway $datasource, k_TemplateFactory $templates) {
-    $this->datasource = $datasource;
-    $this->templates = $templates;
-  }
-  function execute() {
-    return $this->wrap(parent::execute());
-  }
-  function wrapHtml($content) {
-    $t = $this->templates->create("wrapper");
-    return
-      $t->render(
-        $this,
-        array(
-      	  'href' => $this->url(),
-          'title' => "index",
-          'content' => $content
-        ));
-  }
+  	    /**
+   	     * Constructor
+   	     *
+	     * Relies on dependency injection handled by bucket.
+   	     * @see www/index.php
+   	     * @see lib/applicationfactory.php
+   	     *
+   	     * @param object $datasource
+   	     * @param objct $templates
+   	     * 
+   	     * @return void
+   	     */
+        function __construct(model_BlogGateway $datasource, k_TemplateFactory $templates) {
+            $this->datasource = $datasource;
+            $this->templates = $templates;
+        }
+        function execute() {
+            return $this->wrap(parent::execute());
+        }
+        function wrapHtml($content) {
+            $t = $this->templates->create("wrapper");
+            return
+      		    $t->render(
+                $this,
+                array(	
+      	  	      'href' => $this->url(),
+          	      'title' => "index",
+          	      'content' => $content
+                ));
+        }
+        function renderHtml() {
+            $resultset = Array();
+            $results = $this->datasource->select('published', 'desc');
+            $model = Array(
+      	     'resultset' => $results
+            );
+            $tpl = $this->templates->create('blog/index');
+    		return $tpl->render($this, $model);
+  		}
+	}
+	
+We need to create two templates. One for showing the list of blog entries and a wrapper template. Put them in the templates directory.
 
-  function renderHtml() {
-    $resultset = Array();
-    $results = $this->datasource->select('published', 'desc');
-    $model = Array(
-      'resultset' => $results
-    );
-    $tpl = $this->templates->create('blog/index');
-    return $tpl->render($this, $model);
-  }
-}
+	<!-- blog/index.tpl.php -->
+	<?php foreach ($resultset as $result) : ?>
+	  <h2><a href="<?php e(url($result->name)); ?>"><?php e($result->title); ?></a></h2>
+	  <span class="date"><?php e($result->published); ?></span>
+	  <p><?php e($result->excerpt); ?></p>
+	<?php endforeach; ?>
+	
+	<p class="pager">
+		<a style="float:right" href="<?php e(url(null, array('create'))); ?>">create</a>
+	</p>
+		
+	<!-- wrapper.tpl.php -->
+	<a href="<?php e($href); ?>"><?php e($title); ?></a>
+	<div style="border:1px solid #ccc;padding:1em">
+		<?php echo $content; ?>
+	</div>
+
+Now this component is ready to show a list of blog entries. Now all we need to do to make it accessible for the application is map the component from the root controller. This is done differently in Konstrukt than other frameworks. We will add the following method to the root-controller:
+
+  	function map($name) {
+      return 'components_Blog';
+  	}
+  	
+Now try to navigate to http://workspace/blog/www/blog/ and you should see a page with two links. An index-link and a create-link. This means that everyhing works as expected.
