@@ -191,4 +191,4 @@ Now this component is ready to show a list of blog entries. Now all we need to d
       return 'components_Blog';
   	}
   	
-Now try to navigate to http://workspace/blog/www/blog/ and you should see a page with two links. An index-link and a create-link. This means that everyhing works as expected.
+Now try to navigate to http://workspace/blog/www/blog/ and you should see a page with two links. An index-link and a create-link. This means that everyhing works as expected. Now we need some functionality. Have a look on the other classes in the repository and play around with the very simple blog a little.

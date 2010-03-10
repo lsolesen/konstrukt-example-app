@@ -1,7 +1,7 @@
 <?php foreach ($resultset as $result) : ?>
-  <h2><a href="<?php e(url($result->name)); ?>"><?php e($result->title); ?></a></h2>
-  <span class="date"><?php e($result->published); ?></span>
-  <p><?php e($result->excerpt); ?></p>
+  <h2><a href="<?php e(url($result['id'])); ?>"><?php e($result['title']); ?></a></h2>
+  <span class="date"><?php e($result['published']); ?></span>
+  <p><?php e($result['excerpt']); ?></p>
 <?php endforeach; ?>
 
 <p class="pager">
